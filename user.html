@@ -148,25 +148,8 @@
                 <p class="mb-4 text-gray-700">This outlines a typical Public Key Infrastructure (PKI) authentication process where a user's identity is verified using digital certificates and private keys, often involving a smart card or software certificate.</p>
                 <div class="diagram-box">
                     <h3 class="text-lg font-medium mb-2 text-center">Generic PKI Authentication Sequence</h3>
-                    <div class="mermaid">
-sequenceDiagram
-    participant User
-    participant SP as Service Provider (Application)
-    participant IdP_CA as PKI IdP / Certificate Authority
-
-    User->>+SP: 1. Accesses protected resource
-    SP->>-User: 2. Redirects to IdP or initiates challenge (e.g., client certificate request)
-    User->>+IdP_CA: 3. Presents credentials (e.g., inserts smart card, selects certificate)
-    Note over User,IdP_CA: User's private key is used for signing/challenge-response
-    IdP_CA->>IdP_CA: 4. Verifies certificate (chain, revocation) & signature
-    alt Authentication Successful
-        IdP_CA->>-SP: 5. Sends authentication assertion/token (e.g., SAML, Kerberos ticket, or confirms client cert auth)
-        SP->>SP: 6. Validates assertion/token
-        SP->>-User: 7. Grants access to resource
-    else Authentication Failed
-        IdP_CA-->>User: 8. Shows error message
-        SP-->>User: Access Denied
-    end
+                    <div class="ebs-image-container">
+                        <img src="https://placehold.co/800x550/f0f0f0/333?text=EBS+Diagram+(No+Text)+-+Replace+Me" alt="EBS AccessGate Flow - No Text" class="ebs-img-no-text">
                     </div>
                 </div>
                  <h4 class="text-lg font-medium mt-6 mb-2 text-gray-800">Key Elements:</h4>
