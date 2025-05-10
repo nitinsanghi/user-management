@@ -63,7 +63,7 @@
             text-align: center; /* Center the diagram */
             margin-top: 15px;
             margin-bottom: 15px;
-            background-color: white; /* Ensure good contrast for diagram */
+            background-color: white; /*  good contrast for diagram */
             padding:10px;
             border-radius: 8px;
         }
@@ -147,18 +147,54 @@
                 <h2 class="text-xl font-semibold mb-3 text-indigo-700">Scenario 2: Generic PKI-Based Authentication Flow</h2>
                 <p class="mb-4 text-gray-700">This outlines a typical Public Key Infrastructure (PKI) authentication process where a user's identity is verified using digital certificates and private keys, often involving a smart card or software certificate.</p>
                 <div class="diagram-box">
-                    <h3 class="text-lg font-medium mb-2 text-center">Generic PKI Authentication Sequence</h3>
+                    <h3 class="text-lg font-medium mb-2 text-center">Oracle Fusion Based SSO Sequence</h3>
                     <div class="ebs-image-container">
                         <img src="oracle-webgate-generic.png" class="ebs-img-no-text">
                     </div>
                 </div>
-                 <h4 class="text-lg font-medium mt-6 mb-2 text-gray-800">Key Elements:</h4>
-                <ul class="list-disc list-inside text-gray-700 space-y-1">
-                    <li><strong>Digital Certificate:</strong> Electronically proves identity, issued by a Certificate Authority (CA). Contains the public key.</li>
-                    <li><strong>Private Key:</strong> Secret key held by the user, used to sign data or decrypt messages. Stored securely (e.g., on a smart card, TPM, or encrypted file).</li>
-                    <li><strong>Public Key:</strong> Shared openly, used to verify signatures made with the corresponding private key or encrypt messages for the private key holder.</li>
-                    <li><strong>Certificate Authority (CA):</strong> Trusted entity that issues and manages digital certificates.</li>
-                    <li><strong>Challenge-Response:</strong> A common mechanism where the server sends a challenge, and the client signs it with their private key to prove possession.</li>
+                
+                <h4 class="text-lg font-medium mt-6 mb-2 text-gray-800">Key Components for Securing WebLogic Applications (e.g., Hyperion, Analytics, WebCenter Portal):</h4>
+                <ul class="list-disc list-inside text-gray-700 space-y-2">
+                    <li>
+                        <strong>Oracle HTTP Server (OHS):</strong> Acts as the primary web server front-end. It receives incoming HTTP(S) requests from users' browsers. OHS can host static content and, more importantly, acts as a reverse proxy for backend application servers.
+                    </li>
+                    <li>
+                        <strong>WebGate (OAM Agent for OHS):</strong> This is a plug-in module installed on OHS.
+                        <ul class="list-circle list-inside ml-6 mt-1 space-y-1 text-sm">
+                            <li>It intercepts all requests for resources protected by Oracle Access Manager (OAM).</li>
+                            <li>If a user is unauthenticated, WebGate redirects them to the OAM server for login.</li>
+                            <li>Once authenticated, OAM creates a session, and WebGate receives this session information (e.g., via a cookie like OAMAuthnCookie).</li>
+                            <li>For subsequent requests, WebGate validates the OAM session. It also enforces authorization policies defined in OAM, determining if the authenticated user has permission to access the requested resource.</li>
+                        </ul>
+                    </li>
+                    <li>
+                        <strong><code>mod_wl_ohs</code> (WebLogic Server Proxy Plug-In for OHS):</strong> This OHS module is responsible for routing requests from OHS to one or more backend Oracle WebLogic Servers where the actual applications (Hyperion, WebCenter Portal, Analytics, etc.) are deployed.
+                        <ul class="list-circle list-inside ml-6 mt-1 space-y-1 text-sm">
+                            <li>It uses a configuration file (e.g., <code>mod_wl_ohs.conf</code>) that specifies the WebLogic Cluster(s) or Managed Server(s) to forward requests to.</li>
+                            <li>It can provide load balancing across multiple WebLogic instances and handle session stickiness if required.</li>
+                            <li>It forwards the HTTP request (now including headers set by WebGate, like user identity if configured) to the appropriate WebLogic Server.</li>
+                        </ul>
+                    </li>
+                    <li>
+                        <strong>Oracle WebLogic Server (WLS):</strong> The Java EE application server that hosts the business applications (Hyperion, WebCenter Portal, Analytics, etc.).
+                        <ul class="list-circle list-inside ml-6 mt-1 space-y-1 text-sm">
+                            <li>It receives the request from <code>mod_wl_ohs</code>.</li>
+                            <li>The application deployed on WLS can then leverage the user identity asserted by OAM (and passed through WebGate/<code>mod_wl_ohs</code>) for its internal security and personalization.</li>
+                            <li>It processes the request and sends the HTTP response back through <code>mod_wl_ohs</code>, OHS, and WebGate to the user.</li>
+                        </ul>
+                    </li>
+                    <li>
+                        <strong>Interaction Flow Summary:</strong>
+                        <ol class="list-decimal list-inside ml-6 mt-1 space-y-1 text-sm">
+                            <li>User requests an application URL (e.g., for Hyperion).</li>
+                            <li>OHS receives the request.</li>
+                            <li>WebGate on OHS intercepts it, checks for an OAM session. If none, redirects to OAM for authentication. If session exists or is established, WebGate checks authorization.</li>
+                            <li>If authorized, WebGate allows the request to proceed within OHS.</li>
+                            <li><code>mod_wl_ohs</code> picks up the request and forwards it to the appropriate backend WebLogic Server hosting Hyperion.</li>
+                            <li>Hyperion (on WebLogic) processes the request, potentially using the OAM-asserted identity.</li>
+                            <li>The response flows back through the same chain.</li>
+                        </ol>
+                    </li>
                 </ul>
             </div>
 
@@ -171,7 +207,6 @@
                         <img src="con_ai_integration1.gif" alt="EBS AccessGate Flow - No Text" class="ebs-img-no-text">
                         <img src="con_ai_integrationseq.gif" alt="EBS AccessGate Flow - With Text Annotations" class="ebs-img-with-text">
                     </div>
-                    <p class="text-sm text-center text-gray-500 mt-2">Ensure you replace the placeholder image URLs above with your actual image links.</p>
                 </div>
                 <h4 class="text-lg font-medium mt-6 mb-2 text-gray-800">Step-by-Step (Interpreted from Annotated Diagram):</h4>
                 <div class="space-y-3">
@@ -372,7 +407,7 @@ sequenceDiagram
                 // Re-render Mermaid diagrams if the activated tab contains one
                 // This is sometimes necessary if diagrams are in initially hidden tabs
                 if (document.getElementById(targetTab).querySelector('.mermaid')) {
-                    // A slight delay can sometimes help ensure the DOM is ready
+                    // A slight delay can sometimes help  the DOM is ready
                     setTimeout(() => {
                         mermaid.init(undefined, document.getElementById(targetTab).querySelectorAll('.mermaid'));
                     }, 0);
@@ -380,7 +415,7 @@ sequenceDiagram
             });
         });
 
-        // Ensure the first tab is active by default and render its Mermaid diagrams
+        //  the first tab is active by default and render its Mermaid diagrams
         if (tabButtons.length > 0) {
             tabButtons[0].classList.add('border-blue-600', 'text-blue-600', 'active-tab');
             tabButtons[0].classList.remove('border-transparent');
