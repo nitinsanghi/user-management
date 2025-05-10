@@ -1,0 +1,413 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Interactive Authentication & Architecture Visualizer</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* Custom styles for diagrams and tabs */
+        body { font-family: 'Inter', sans-serif; }
+        .tab-content { display: none; }
+        .tab-content.active { display: block; }
+        .diagram-box { border: 1px solid #ccc; padding: 10px; margin: 10px 0; border-radius: 8px; background-color: #f9f9f9; }
+        .diagram-component { background-color: #e0e7ff; border: 1px solid #a5b4fc; padding: 8px; margin: 5px; border-radius: 6px; text-align: center; font-size: 0.9em; }
+        .diagram-component-alt { background-color: #d1fae5; border: 1px solid #6ee7b7; }
+        .diagram-component-dmz { background-color: #fee2e2; border: 1px solid #fca5a5; }
+        .diagram-arrow { text-align: center; margin: 10px 0; font-size: 1.5em; color: #6b7280; }
+        .step-description { margin-bottom: 15px; padding-left: 20px; position: relative; }
+        .step-description::before { content: attr(data-step); position: absolute; left: -5px; top: 0; background-color: #3b82f6; color: white; width: 20px; height: 20px; border-radius: 50%; text-align: center; line-height: 20px; font-weight: bold; font-size: 0.8em; }
+        .code-block { background-color: #f3f4f6; border: 1px solid #e5e7eb; padding: 10px; border-radius: 6px; font-family: monospace; white-space: pre-wrap; margin-top:10px; }
+        .flow-item { display: flex; align-items: center; margin-bottom: 10px; }
+        .flow-icon { font-size: 1.5rem; margin-right: 10px; width: 30px; text-align: center; }
+        .flow-text { flex-grow: 1; }
+        .flow-connector { width: 20px; text-align: center; font-size: 1.5rem; color: #9ca3af; margin: 0 5px; }
+        .grid-container { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; }
+        .network-zone { border: 2px dashed #ccc; padding: 1rem; margin-top: 1rem; border-radius: 8px; }
+        .firewall { background-color: #4b5563; color: white; padding: 5px 0; text-align: center; font-weight: bold; border-radius: 4px; margin: 10px 0; }
+        
+        /* Styles for EBS image hover */
+        .ebs-image-container {
+            position: relative;
+            width: 100%; /* Or a fixed width */
+            max-width: 800px; /* Adjust as needed */
+            margin: 10px auto;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+        .ebs-image-container img {
+            display: block;
+            width: 100%;
+            height: auto;
+            transition: opacity 0.3s ease-in-out;
+        }
+        .ebs-image-container .ebs-img-no-text {
+            position: relative;
+            z-index: 1;
+        }
+        .ebs-image-container .ebs-img-with-text {
+            position: absolute;
+            top: 0;
+            left: 0;
+            opacity: 0;
+            z-index: 2;
+        }
+        .ebs-image-container:hover .ebs-img-with-text {
+            opacity: 1;
+        }
+        .ebs-image-container:hover .ebs-img-no-text {
+            opacity: 0; /* Or keep it slightly visible: opacity: 0.2; */
+        }
+        .mermaid {
+            text-align: center; /* Center the diagram */
+            margin-top: 15px;
+            margin-bottom: 15px;
+            background-color: white; /* Ensure good contrast for diagram */
+            padding:10px;
+            border-radius: 8px;
+        }
+
+    </style>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body class="bg-gray-100 p-4 md:p-8">
+
+    <div class="container mx-auto bg-white shadow-xl rounded-lg overflow-hidden">
+        <header class="bg-gradient-to-r from-blue-600 to-indigo-700 p-6">
+            <h1 class="text-2xl md:text-3xl font-bold text-white">Authentication & System Architecture Visualizer</h1>
+        </header>
+
+        <nav class="bg-gray-200 border-b border-gray-300">
+            <ul class="flex flex-wrap -mb-px text-sm font-medium text-center text-gray-500">
+                <li class="mr-2">
+                    <button class="tab-button inline-block p-4 border-b-2 border-transparent rounded-t-lg hover:text-gray-600 hover:border-gray-300 active-tab" data-tab="tab1">1. User Journey</button>
+                </li>
+                <li class="mr-2">
+                    <button class="tab-button inline-block p-4 border-b-2 border-transparent rounded-t-lg hover:text-gray-600 hover:border-gray-300" data-tab="tab2">2. Generic PKI</button>
+                </li>
+                <li class="mr-2">
+                    <button class="tab-button inline-block p-4 border-b-2 border-transparent rounded-t-lg hover:text-gray-600 hover:border-gray-300" data-tab="tab3">3. EBS AccessGate</button>
+                </li>
+                <li class="mr-2">
+                    <button class="tab-button inline-block p-4 border-b-2 border-transparent rounded-t-lg hover:text-gray-600 hover:border-gray-300" data-tab="tab4">4. EBS DMZ</button>
+                </li>
+                <li class="mr-2">
+                    <button class="tab-button inline-block p-4 border-b-2 border-transparent rounded-t-lg hover:text-gray-600 hover:border-gray-300" data-tab="tab5">5. Oracle Products</button>
+                </li>
+                <li>
+                    <button class="tab-button inline-block p-4 border-b-2 border-transparent rounded-t-lg hover:text-gray-600 hover:border-gray-300" data-tab="tab6">6. SAML (OAM as SP)</button>
+                </li>
+            </ul>
+        </nav>
+
+        <div class="p-4 md:p-6">
+            <div id="tab1" class="tab-content active">
+                <h2 class="text-xl font-semibold mb-3 text-indigo-700">Scenario 1: Multi-Layered User Authentication Journey</h2>
+                <p class="mb-4 text-gray-700">This scenario illustrates a user authenticating through a multi-layered system, involving an internal Identity Provider (Oracle Access Manager) and an external PKI-based Identity Provider.</p>
+
+                <div class="diagram-box">
+                    <h3 class="text-lg font-medium mb-2 text-center">Authentication Flow Overview</h3>
+                    <div class="flex flex-col items-center">
+                        <div class="diagram-component w-1/2">User attempts to access Application</div>
+                        <div class="diagram-arrow">⬇️</div>
+                        <div class="diagram-component w-1/2">Redirect to Internal IdP (OAM)</div>
+                        <div class="diagram-arrow">🔄</div>
+                        <div class="diagram-component-alt w-2/3 p-3">
+                            <strong>OAM Authentication (2FA)</strong><br>
+                            1. Username/Password<br>
+                            2. Email/SMS OTP
+                        </div>
+                        <div class="diagram-arrow">⬇️ (If OAM Auth Success)</div>
+                        <div class="diagram-component w-1/2">Redirect to External IdP (PKI)</div>
+                        <div class="diagram-arrow">🔄</div>
+                         <div class="diagram-component-alt w-2/3 p-3">
+                            <strong>External PKI Authentication (2FA)</strong><br>
+                            <em>Option A:</em> Smart Card + PIN<br>
+                            <em>Option B:</em> Mobile PKI + PIN
+                        </div>
+                        <div class="diagram-arrow">⬇️ (If PKI Auth Success)</div>
+                        <div class="diagram-component w-1/2 bg-green-200 border-green-500">Access Granted to Application</div>
+                    </div>
+                </div>
+                <h4 class="text-lg font-medium mt-6 mb-2 text-gray-800">Step-by-Step Breakdown:</h4>
+                <div class="space-y-3">
+                    <p class="step-description" data-step="1"><strong>Initiation:</strong> User attempts to access the target application.</p>
+                    <p class="step-description" data-step="2"><strong>Internal IdP (OAM) - Credentials:</strong> User provides Username & Password to OAM.</p>
+                    <p class="step-description" data-step="3"><strong>Internal IdP (OAM) - OTP:</strong> Upon successful credential validation, OAM prompts for Email/SMS OTP. User submits OTP.</p>
+                    <p class="step-description" data-step="4"><strong>Routing to External IdP:</strong> If OAM authentication is successful, user is redirected for PKI authentication.</p>
+                    <p class="step-description" data-step="5"><strong>External IdP (PKI) - Method Choice:</strong> User selects/is routed to Smart Card or Mobile PKI.</p>
+                    <p class="step-description" data-step="6A"><strong>Smart Card Path:</strong> User inserts Smart Card and enters PIN.</p>
+                    <p class="step-description" data-step="6B"><strong>Mobile PKI Path:</strong> User initiates Mobile PKI, receives notification/code, approves, and enters Mobile PKI PIN.</p>
+                    <p class="step-description" data-step="7"><strong>Access Decision:</strong> If PKI authentication is successful, access to the application is granted.</p>
+                </div>
+            </div>
+
+            <div id="tab2" class="tab-content">
+                <h2 class="text-xl font-semibold mb-3 text-indigo-700">Scenario 2: Generic PKI-Based Authentication Flow</h2>
+                <p class="mb-4 text-gray-700">This outlines a typical Public Key Infrastructure (PKI) authentication process where a user's identity is verified using digital certificates and private keys, often involving a smart card or software certificate.</p>
+                <div class="diagram-box">
+                    <h3 class="text-lg font-medium mb-2 text-center">Generic PKI Authentication Sequence</h3>
+                    <div class="mermaid">
+sequenceDiagram
+    participant User
+    participant SP as Service Provider (Application)
+    participant IdP_CA as PKI IdP / Certificate Authority
+
+    User->>+SP: 1. Accesses protected resource
+    SP->>-User: 2. Redirects to IdP or initiates challenge (e.g., client certificate request)
+    User->>+IdP_CA: 3. Presents credentials (e.g., inserts smart card, selects certificate)
+    Note over User,IdP_CA: User's private key is used for signing/challenge-response
+    IdP_CA->>IdP_CA: 4. Verifies certificate (chain, revocation) & signature
+    alt Authentication Successful
+        IdP_CA->>-SP: 5. Sends authentication assertion/token (e.g., SAML, Kerberos ticket, or confirms client cert auth)
+        SP->>SP: 6. Validates assertion/token
+        SP->>-User: 7. Grants access to resource
+    else Authentication Failed
+        IdP_CA-->>User: 8. Shows error message
+        SP-->>User: Access Denied
+    end
+                    </div>
+                </div>
+                 <h4 class="text-lg font-medium mt-6 mb-2 text-gray-800">Key Elements:</h4>
+                <ul class="list-disc list-inside text-gray-700 space-y-1">
+                    <li><strong>Digital Certificate:</strong> Electronically proves identity, issued by a Certificate Authority (CA). Contains the public key.</li>
+                    <li><strong>Private Key:</strong> Secret key held by the user, used to sign data or decrypt messages. Stored securely (e.g., on a smart card, TPM, or encrypted file).</li>
+                    <li><strong>Public Key:</strong> Shared openly, used to verify signatures made with the corresponding private key or encrypt messages for the private key holder.</li>
+                    <li><strong>Certificate Authority (CA):</strong> Trusted entity that issues and manages digital certificates.</li>
+                    <li><strong>Challenge-Response:</strong> A common mechanism where the server sends a challenge, and the client signs it with their private key to prove possession.</li>
+                </ul>
+            </div>
+
+            <div id="tab3" class="tab-content">
+                <h2 class="text-xl font-semibold mb-3 text-indigo-700">Scenario 3: Oracle E-Business Suite Integration with OAM (AccessGate)</h2>
+                <p class="mb-4 text-gray-700">This scenario shows how Oracle Access Manager (OAM) secures Oracle E-Business Suite (EBS) using WebGate and EBS AccessGate. Hover over the diagram to see annotations.</p>
+                <div class="diagram-box">
+                     <h3 class="text-lg font-medium mb-2 text-center">EBS AccessGate Flow (Hover for details)</h3>
+                    <div class="ebs-image-container">
+                        <img src="https://placehold.co/800x550/f0f0f0/333?text=EBS+Diagram+(No+Text)+-+Replace+Me" alt="EBS AccessGate Flow - No Text" class="ebs-img-no-text">
+                        <img src="https://placehold.co/800x550/e0e0e0/333?text=EBS+Diagram+(With+Text)+-+Replace+Me" alt="EBS AccessGate Flow - With Text Annotations" class="ebs-img-with-text">
+                    </div>
+                    <p class="text-sm text-center text-gray-500 mt-2">Ensure you replace the placeholder image URLs above with your actual image links.</p>
+                </div>
+                <h4 class="text-lg font-medium mt-6 mb-2 text-gray-800">Step-by-Step (Interpreted from Annotated Diagram):</h4>
+                <div class="space-y-3">
+                    <p class="step-description" data-step="1">User requests a protected EBS resource.</p>
+                    <p class="step-description" data-step="2">User is redirected to the OAM-protected AccessGate.</p>
+                    <p class="step-description" data-step="3">Per OAM policies, WebGate intercepts the request, collects credentials (if needed), and relays them to the Access Manager server.</p>
+                    <p class="step-description" data-step="4">OAM verifies credentials against the user directory (e.g., Oracle Directory Services) and creates a user session.</p>
+                    <p class="step-description" data-step="5">OAM WebGate securely passes the user identifier to EBS AccessGate.</p>
+                    <p class="step-description" data-step="6">AccessGate identifies the EBS user that is linked to the authenticated Oracle Directory Services user.</p>
+                    <p class="step-description" data-step="7">User is redirected to the original URL with an authenticated EBS session, and the resource is returned to the browser.</p>
+                </div>
+            </div>
+
+            <div id="tab4" class="tab-content">
+                <h2 class="text-xl font-semibold mb-3 text-indigo-700">Scenario 4: EBS Access via DMZ with WebGate</h2>
+                <p class="mb-4 text-gray-700">Illustrates the network architecture for external users accessing Oracle E-Business Suite, involving a Demilitarized Zone (DMZ).</p>
+                <div class="diagram-box">
+                    <h3 class="text-lg font-medium mb-2 text-center">DMZ Architecture for EBS Access</h3>
+                    <div class="flex flex-col items-center space-y-2">
+                        <div class="diagram-component w-1/3">External User</div>
+                        <div class="text-gray-600">🌐 Internet 🌐</div>
+                        <div class="firewall w-full">Firewall 1 (External)</div>
+                        
+                        <div class="network-zone w-full">
+                            <h4 class="text-center font-semibold text-orange-600">DMZ (Demilitarized Zone)</h4>
+                            <div class="diagram-component-dmz w-1/2 mx-auto">Web Server / Reverse Proxy + WebGate</div>
+                        </div>
+
+                        <div class="firewall w-full">Firewall 2 (Internal)</div>
+
+                        <div class="network-zone w-full">
+                             <h4 class="text-center font-semibold text-green-600">Internal Network</h4>
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-2">
+                                <div class="diagram-component-alt">Oracle Access Manager (OAM)</div>
+                                <div class="diagram-component-alt">Oracle Directory Services (OID/OUD)</div>
+                                <div class="diagram-component-alt col-span-1 md:col-span-2">EBS Application Tier (Forms, Concurrent Processing, etc.)</div>
+                                <div class="diagram-component-alt col-span-1 md:col-span-2">EBS Database Tier</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <h4 class="text-lg font-medium mt-6 mb-2 text-gray-800">Flow Description:</h4>
+                <div class="space-y-3">
+                    <p class="step-description" data-step="1">External user attempts to access an EBS URL.</p>
+                    <p class="step-description" data-step="2">Request passes through the external firewall to the Web Server/Reverse Proxy in the DMZ.</p>
+                    <p class="step-description" data-step="3">The WebGate on the DMZ server intercepts the request. If the user is not authenticated, WebGate initiates the OAM authentication flow.</p>
+                    <p class="step-description" data-step="4">WebGate communicates with OAM (located in the internal network) through the internal firewall. This communication is typically over specific, secured ports.</p>
+                    <p class="step-description" data-step="5">User authenticates with OAM (which might involve directory lookups, MFA, etc., all within the internal network or trusted zones).</p>
+                    <p class="step-description" data-step="6">Once OAM confirms authentication, it provides a session token to WebGate.</p>
+                    <p class="step-description" data-step="7">WebGate (in DMZ) then proxies the authenticated request (or allows access) to the EBS Application Tier in the internal network, again through the internal firewall.</p>
+                    <p class="step-description" data-step="8">EBS processes the request and returns the response, which flows back through the same path.</p>
+                </div>
+            </div>
+
+            <div id="tab5" class="tab-content">
+                <h2 class="text-xl font-semibold mb-3 text-indigo-700">Scenario 5: SSO for Oracle Products via OAM & WebGate</h2>
+                <p class="mb-4 text-gray-700">Demonstrates how Oracle Access Manager and WebGate provide Single Sign-On (SSO) across various Oracle applications.</p>
+                <div class="diagram-box">
+                    <h3 class="text-lg font-medium mb-2 text-center">Centralized SSO with OAM</h3>
+                    <div class="flex flex-col items-center space-y-2">
+                        <div class="diagram-component w-1/3">User</div>
+                        <div class="diagram-arrow">⬇️</div>
+                        <div class="diagram-component-alt w-1/2">Oracle Access Manager (OAM) & Oracle Directory Services</div>
+                        <div class="diagram-arrow">↕️ (Authentication & Authorization)</div>
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 w-full mt-4">
+                            <div>
+                                <div class="diagram-component">WebGate for Hyperion</div>
+                                <div class="diagram-arrow">⬇️</div>
+                                <div class="diagram-component">Oracle Hyperion</div>
+                            </div>
+                            <div>
+                                <div class="diagram-component">WebGate for WebCenter Portal</div>
+                                <div class="diagram-arrow">⬇️</div>
+                                <div class="diagram-component">Oracle WebCenter Portal</div>
+                            </div>
+                            <div>
+                                <div class="diagram-component">WebGate for Analytics</div>
+                                <div class="diagram-arrow">⬇️</div>
+                                <div class="diagram-component">Oracle Analytics</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <h4 class="text-lg font-medium mt-6 mb-2 text-gray-800">SSO Flow:</h4>
+                <div class="space-y-3">
+                    <p class="step-description" data-step="1">User attempts to access an Oracle application (e.g., Hyperion).</p>
+                    <p class="step-description" data-step="2">The WebGate protecting Hyperion intercepts the request. If the user doesn't have an active OAM SSO session, WebGate redirects the user to OAM for authentication.</p>
+                    <p class="step-description" data-step="3">User authenticates with OAM (e.g., username/password, MFA). OAM creates an SSO session cookie for the user's browser, typically scoped to the relevant domain.</p>
+                    <p class="step-description" data-step="4">User is redirected back to Hyperion. WebGate validates the SSO session with OAM and grants access.</p>
+                    <p class="step-description" data-step="5">Now, if the user tries to access another OAM-protected Oracle application (e.g., WebCenter Portal) in the same SSO domain, the WebGate for WebCenter Portal detects the existing OAM SSO session cookie.</p>
+                    <p class="step-description" data-step="6">WebGate for WebCenter validates this session with OAM. Since a valid session exists, the user is granted access to WebCenter Portal without needing to re-enter credentials.</p>
+                    <p class="step-description" data-step="7">The same applies to Oracle Analytics or any other application integrated with the same OAM instance and WebGates within the SSO domain.</p>
+                </div>
+            </div>
+
+            <div id="tab6" class="tab-content">
+                <h2 class="text-xl font-semibold mb-3 text-indigo-700">Scenario 6: SAML Federation - OAM as Service Provider (SP)</h2>
+                <p class="mb-4 text-gray-700">Explains how Oracle Access Manager (OAM) can act as a Service Provider (SP), integrating with a 3rd party Identity Provider (IdP) for authentication using the SAML protocol. This allows users to authenticate at the 3rd party IdP and then access OAM-protected applications.</p>
+                 <div class="diagram-box">
+                    <h3 class="text-lg font-medium mb-2 text-center">OAM as SAML SP Flow (Federating to 3rd Party IdP)</h3>
+                    <div class="mermaid">
+sequenceDiagram
+    title SAML Authentication Flow (App -> OAM (SP) -> 3rd Party IDP)
+
+    participant User
+    participant App_WebGate as Application / WebGate
+    participant OAM_Server as OAM Server (SP)
+    participant Third_Party_IDP as 3rd Party IDP
+
+    User->>+App_WebGate: 1. Access Application URL (/myapp)
+    activate App_WebGate
+    Note over App_WebGate: Intercepts request, checks OAM session
+    App_WebGate-->>User: 2. Redirect to OAM (No OAM Session)
+    deactivate App_WebGate
+
+    User->>+OAM_Server: 3. Request OAM Authentication URL
+    activate OAM_Server
+    Note right of OAM_Server: OAM determines SAML Federation is required (SP role)
+    OAM_Server->>OAM_Server: 4. Generate SAML AuthnRequest for 3rd Party IdP
+    OAM_Server-->>User: 5. Redirect to 3rd Party IDP SSO URL (with AuthnRequest)
+    deactivate OAM_Server
+
+    User->>+Third_Party_IDP: 6. Request IDP SSO URL (forwarding AuthnRequest)
+    activate Third_Party_IDP
+    Note right of Third_Party_IDP: IDP Checks for existing IDP session
+    alt No Active IDP Session
+        Third_Party_IDP-->>User: 7a. Present IDP Login Page
+        User->>Third_Party_IDP: 7b. Submit Credentials (user/pass/MFA at IdP)
+        Third_Party_IDP->>Third_Party_IDP: 7c. Authenticate User
+    else Active IDP Session Found
+        Note right of Third_Party_IDP: Skip login (IDP SSO)
+    end
+    Note right of Third_Party_IDP: IDP sets its own session cookie
+    Third_Party_IDP->>Third_Party_IDP: 8. Generate Signed SAML Assertion
+    Third_Party_IDP-->>User: 9. Redirect to OAM ACS URL (with SAML Assertion via POST)
+    deactivate Third_Party_IDP
+
+    User->>+OAM_Server: 10. POST SAML Assertion to OAM Assertion Consumer Service (ACS)
+    activate OAM_Server
+    OAM_Server->>OAM_Server: 11. Validate SAML Assertion (Signature, Issuer, etc.)
+    Note right of OAM_Server: If Assertion is valid: Create OAM Session, map user
+    OAM_Server-->>User: 12. Set OAM Session Cookie & Redirect to original App URL
+    deactivate OAM_Server
+
+    User->>+App_WebGate: 13. Request Application URL again (now with OAM Cookie)
+    activate App_WebGate
+    Note over App_WebGate: Intercepts request, finds OAM Cookie
+    App_WebGate->>+OAM_Server: 14. Validate OAM Cookie (OAM session check)
+    activate OAM_Server
+    OAM_Server-->>-App_WebGate: 15. Cookie is Valid (Session OK)
+    deactivate OAM_Server
+    Note over App_WebGate: Access Granted
+    App_WebGate->>User: 16. Return Application Content/Page
+    deactivate App_WebGate
+    opt Application sets own session
+        App_WebGate-->>User: Set Application Session Cookie (e.g., JSESSIONID)
+    end
+                    </div>
+                </div>
+                <h4 class="text-lg font-medium mt-6 mb-2 text-gray-800">Key SAML Concepts (OAM as SP):</h4>
+                <ul class="list-disc list-inside text-gray-700 space-y-1">
+                    <li><strong>Service Provider (SP):</strong> The entity that relies on an external IdP for authentication before granting access to a resource (OAM and the application it protects are collectively the SP in this context).</li>
+                    <li><strong>Identity Provider (IdP):</strong> The external entity that authenticates the user and provides an assertion about their identity (3rd Party IdP).</li>
+                    <li><strong>SAML Assertion:</strong> An XML document from the IdP containing statements about the user's authentication.</li>
+                    <li><strong>SAML AuthnRequest:</strong> Sent by OAM (as SP) to the 3rd Party IdP to request user authentication.</li>
+                    <li><strong>Assertion Consumer Service (ACS):</strong> An endpoint on OAM (SP) that receives and processes the SAML Assertion from the IdP.</li>
+                    <li><strong>Federation Agreement/Trust:</strong> Pre-established configuration between OAM (SP) and the 3rd Party IdP, including exchanging metadata, certificates, and defining endpoints.</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/mermaid@latest/dist/mermaid.js"></script>
+    <script>
+        // Initialize Mermaid
+        mermaid.initialize({ startOnLoad: true });
+
+        const tabButtons = document.querySelectorAll('.tab-button');
+        const tabContents = document.querySelectorAll('.tab-content');
+
+        tabButtons.forEach(button => {
+            button.addEventListener('click', () => {
+                // Deactivate all tabs and content
+                tabButtons.forEach(btn => {
+                    btn.classList.remove('border-blue-600', 'text-blue-600', 'active-tab');
+                    btn.classList.add('border-transparent', 'hover:text-gray-600', 'hover:border-gray-300');
+                });
+                tabContents.forEach(content => {
+                    content.classList.remove('active');
+                });
+
+                // Activate clicked tab and content
+                button.classList.add('border-blue-600', 'text-blue-600', 'active-tab');
+                button.classList.remove('border-transparent', 'hover:text-gray-600', 'hover:border-gray-300');
+                const targetTab = button.getAttribute('data-tab');
+                document.getElementById(targetTab).classList.add('active');
+
+                // Re-render Mermaid diagrams if the activated tab contains one
+                // This is sometimes necessary if diagrams are in initially hidden tabs
+                if (document.getElementById(targetTab).querySelector('.mermaid')) {
+                    // A slight delay can sometimes help ensure the DOM is ready
+                    setTimeout(() => {
+                        mermaid.init(undefined, document.getElementById(targetTab).querySelectorAll('.mermaid'));
+                    }, 0);
+                }
+            });
+        });
+
+        // Ensure the first tab is active by default and render its Mermaid diagrams
+        if (tabButtons.length > 0) {
+            tabButtons[0].classList.add('border-blue-600', 'text-blue-600', 'active-tab');
+            tabButtons[0].classList.remove('border-transparent');
+            if (document.getElementById('tab1').querySelector('.mermaid')) {
+                 setTimeout(() => {
+                    mermaid.init(undefined, document.getElementById('tab1').querySelectorAll('.mermaid'));
+                }, 0);
+            }
+        }
+    </script>
+
+</body>
+</html>
