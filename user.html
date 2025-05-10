@@ -100,7 +100,10 @@
                     <button class="tab-button inline-block p-4 border-b-2 border-transparent rounded-t-lg hover:text-gray-600 hover:border-gray-300" data-tab="tab6">Oracle Products</button>
                 </li>
                 <li>
-                    <button class="tab-button inline-block p-4 border-b-2 border-transparent rounded-t-lg hover:text-gray-600 hover:border-gray-300" data-tab="tab7">6. SAML (OAM as SP)</button>
+                    <button class="tab-button inline-block p-4 border-b-2 border-transparent rounded-t-lg hover:text-gray-600 hover:border-gray-300" data-tab="tab7">SSO</button>
+                </li>
+                <li>
+                    <button class="tab-button inline-block p-4 border-b-2 border-transparent rounded-t-lg hover:text-gray-600 hover:border-gray-300" data-tab="tab8">Auth Sequence Diagram</button>
                 </li>
             </ul>
         </nav>
@@ -319,8 +322,60 @@
                 </div>
             </div>
 
-            <div id="tab7" class="tab-content">
-                <h2 class="text-xl font-semibold mb-3 text-indigo-700">Scenario 6: SAML Federation - OAM as Service Provider (SP)</h2>
+             <div id="tab7" class="tab-content">
+                <h2 class="text-xl font-semibold mb-3 text-indigo-700">Scenario 6: SSO at OAM and SSO at PKI Level </h2>
+                <p class="mb-4 text-gray-700">Explains how Oracle Access Manager (OAM) can act as a Service Provider (SP), integrating with a 3rd party Identity Provider (IdP) for authentication using the SAML protocol. This allows users to authenticate at the 3rd party IdP and then access OAM-protected applications.</p>
+                 <div class="diagram-box">
+                    <h3 class="text-lg font-medium mb-2 text-center">OAM as SAML SP Flow (Federating to 3rd Party IdP)</h3>
+                    <div class="mermaid">
+sequenceDiagram
+    title Simplified Unified Authentication Flow
+    
+    participant User as User (Browser)
+    participant EBS as EBS Application
+    participant OAM as OAM
+    participant PKI as PKI Provider
+    participant Hyperion as Hyperion
+    participant MoF as MoF Supplier Portal
+    
+    rect rgba(221, 235, 247, 0.6)
+    Note right of User: Initial Authentication Flow
+        User->>EBS: 1. Access EBS
+        EBS->>OAM: 2. Redirect to OAM
+        OAM->>PKI: 3. Redirect to PKI Provider
+        PKI->>User: 4. Request PKI Authentication
+        User->>PKI: 5. Provide PKI Credentials
+        PKI->>OAM: 6. Authentication Success
+        OAM->>EBS: 7. User Authenticated
+        EBS->>User: 8. Access Granted
+    end
+    
+    rect rgba(226, 239, 218, 0.6)
+    Note right of User: Hyperion SSO (via OAM)
+        User->>Hyperion: 1. Access Hyperion
+        Hyperion->>OAM: 2. Check Authentication
+        Note over OAM: OAM Level SSO
+        OAM->>Hyperion: 3. User Already Authenticated
+        Hyperion->>User: 4. Access Granted
+    end
+    
+    rect rgba(242, 220, 219, 0.6)
+    Note right of User: MoF Portal SSO (via PKI)
+        User->>MoF: 1. Access MoF Supplier Portal
+        MoF->>PKI: 2. Check Authentication
+        Note over PKI: PKI Level SSO
+        PKI->>MoF: 3. User Already Authenticated
+        MoF->>User: 4. Access Granted
+    end
+                    </div>
+                </div>
+               
+            </div>
+        </div>
+    </div>
+
+            <div id="tab8" class="tab-content">
+                <h2 class="text-xl font-semibold mb-3 text-indigo-700">Detailed Authentication Sequence</h2>
                 <p class="mb-4 text-gray-700">Explains how Oracle Access Manager (OAM) can act as a Service Provider (SP), integrating with a 3rd party Identity Provider (IdP) for authentication using the SAML protocol. This allows users to authenticate at the 3rd party IdP and then access OAM-protected applications.</p>
                  <div class="diagram-box">
                     <h3 class="text-lg font-medium mb-2 text-center">OAM as SAML SP Flow (Federating to 3rd Party IdP)</h3>
