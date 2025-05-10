@@ -80,17 +80,21 @@
 
         <nav class="bg-gray-200 border-b border-gray-300">
             <ul class="flex flex-wrap -mb-px text-sm font-medium text-center text-gray-500">
+                
                 <li class="mr-2">
-                    <button class="tab-button inline-block p-4 border-b-2 border-transparent rounded-t-lg hover:text-gray-600 hover:border-gray-300 active-tab" data-tab="tab1">1. User Journey</button>
+                    <button class="tab-button inline-block p-4 border-b-2 border-transparent rounded-t-lg hover:text-gray-600 hover:border-gray-300 active-tab" data-tab="tab1">System Components</button>
                 </li>
                 <li class="mr-2">
-                    <button class="tab-button inline-block p-4 border-b-2 border-transparent rounded-t-lg hover:text-gray-600 hover:border-gray-300" data-tab="tab2">2. Generic PKI</button>
+                    <button class="tab-button inline-block p-4 border-b-2 border-transparent rounded-t-lg hover:text-gray-600 hover:border-gray-300 active-tab" data-tab="tab2">1. User Journey</button>
                 </li>
                 <li class="mr-2">
-                    <button class="tab-button inline-block p-4 border-b-2 border-transparent rounded-t-lg hover:text-gray-600 hover:border-gray-300" data-tab="tab3">3. EBS AccessGate</button>
+                    <button class="tab-button inline-block p-4 border-b-2 border-transparent rounded-t-lg hover:text-gray-600 hover:border-gray-300" data-tab="tab3">2. EBS AccessGate</button>
                 </li>
                 <li class="mr-2">
-                    <button class="tab-button inline-block p-4 border-b-2 border-transparent rounded-t-lg hover:text-gray-600 hover:border-gray-300" data-tab="tab4">4. EBS DMZ</button>
+                    <button class="tab-button inline-block p-4 border-b-2 border-transparent rounded-t-lg hover:text-gray-600 hover:border-gray-300" data-tab="tab4">3. EBS DMZ</button>
+                </li>
+                                <li class="mr-2">
+                    <button class="tab-button inline-block p-4 border-b-2 border-transparent rounded-t-lg hover:text-gray-600 hover:border-gray-300" data-tab="tab2">4. Generic PKI</button>
                 </li>
                 <li class="mr-2">
                     <button class="tab-button inline-block p-4 border-b-2 border-transparent rounded-t-lg hover:text-gray-600 hover:border-gray-300" data-tab="tab5">5. Oracle Products</button>
@@ -102,7 +106,16 @@
         </nav>
 
         <div class="p-4 md:p-6">
-            <div id="tab1" class="tab-content active">
+
+<div id="tab1" class="tab-content active">
+    <h2 class="text-xl font-semibold mb-3 text-indigo-700">System Component Diagram</h2>
+    <p class="mb-4 text-gray-700">System Component Diagram</p>
+    <div class="diagram-box">
+        <p>Your draw.io diagram will be embedded here.</p>
+        </div>
+</div>
+            
+            <div id="tab2" class="tab-content">
                 <h2 class="text-xl font-semibold mb-3 text-indigo-700">Scenario 1: Multi-Layered User Authentication Journey</h2>
                 <p class="mb-4 text-gray-700">This scenario illustrates a user authenticating through a multi-layered system, involving an internal Identity Provider (Oracle Access Manager) and an external PKI-based Identity Provider.</p>
 
@@ -208,7 +221,7 @@
                 </div>
             </div>
 
-            <div id="tab2" class="tab-content">
+            <div id="tab5" class="tab-content">
                 <h2 class="text-xl font-semibold mb-3 text-indigo-700">Scenario 4: Generic PKI-Based Authentication Flow</h2>
                 <p class="mb-4 text-gray-700">This outlines a typical Public Key Infrastructure (PKI) authentication process where a user's identity is verified using digital certificates and private keys, often involving a smart card or software certificate.</p>
                 <div class="diagram-box">
@@ -265,7 +278,7 @@
                 </ul>
             </div>
             
-            <div id="tab5" class="tab-content">
+            <div id="tab6" class="tab-content">
                 <h2 class="text-xl font-semibold mb-3 text-indigo-700">Scenario 5: SSO for Oracle Products via OAM & WebGate</h2>
                 <p class="mb-4 text-gray-700">Demonstrates how Oracle Access Manager and WebGate provide Single Sign-On (SSO) across various Oracle applications.</p>
                 <div class="diagram-box">
@@ -306,7 +319,7 @@
                 </div>
             </div>
 
-            <div id="tab6" class="tab-content">
+            <div id="tab7" class="tab-content">
                 <h2 class="text-xl font-semibold mb-3 text-indigo-700">Scenario 6: SAML Federation - OAM as Service Provider (SP)</h2>
                 <p class="mb-4 text-gray-700">Explains how Oracle Access Manager (OAM) can act as a Service Provider (SP), integrating with a 3rd party Identity Provider (IdP) for authentication using the SAML protocol. This allows users to authenticate at the 3rd party IdP and then access OAM-protected applications.</p>
                  <div class="diagram-box">
