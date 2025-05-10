@@ -143,13 +143,79 @@
                 </div>
             </div>
 
+            
+
+            <div id="tab3" class="tab-content">
+                <h2 class="text-xl font-semibold mb-3 text-indigo-700">Scenario 2: Oracle E-Business Suite Integration with OAM (AccessGate)</h2>
+                <p class="mb-4 text-gray-700">This scenario shows how Oracle Access Manager (OAM) secures Oracle E-Business Suite (EBS) using WebGate and EBS AccessGate. Hover over the diagram to see annotations.</p>
+                <div class="diagram-box">
+                     <h3 class="text-lg font-medium mb-2 text-center">EBS AccessGate Flow (Hover for details)</h3>
+                    <div class="ebs-image-container">
+                        <img src="con_ai_integration1.gif" alt="EBS AccessGate Flow - No Text" class="ebs-img-no-text">
+                        <img src="con_ai_integrationseq.gif" alt="EBS AccessGate Flow - With Text Annotations" class="ebs-img-with-text">
+                    </div>
+                </div>
+                <h4 class="text-lg font-medium mt-6 mb-2 text-gray-800">Step-by-Step (Interpreted from Annotated Diagram):</h4>
+                <div class="space-y-3">
+                    <p class="step-description" data-step="1">User requests a protected EBS resource.</p>
+                    <p class="step-description" data-step="2">User is redirected to the OAM-protected AccessGate.</p>
+                    <p class="step-description" data-step="3">Per OAM policies, WebGate intercepts the request, collects credentials (if needed), and relays them to the Access Manager server.</p>
+                    <p class="step-description" data-step="4">OAM verifies credentials against the user directory (e.g., Oracle Directory Services) and creates a user session.</p>
+                    <p class="step-description" data-step="5">OAM WebGate securely passes the user identifier to EBS AccessGate.</p>
+                    <p class="step-description" data-step="6">AccessGate identifies the EBS user that is linked to the authenticated Oracle Directory Services user.</p>
+                    <p class="step-description" data-step="7">User is redirected to the original URL with an authenticated EBS session, and the resource is returned to the browser.</p>
+                </div>
+            </div>
+
+            <div id="tab4" class="tab-content">
+                <h2 class="text-xl font-semibold mb-3 text-indigo-700">Scenario 3: EBS Access via DMZ with WebGate</h2>
+                <p class="mb-4 text-gray-700">Illustrates the network architecture for external users accessing Oracle E-Business Suite, involving a Demilitarized Zone (DMZ).</p>
+                <div class="diagram-box">
+                    <h3 class="text-lg font-medium mb-2 text-center">DMZ Architecture for EBS Access</h3>
+                    <div class="flex flex-col items-center space-y-2">
+                        <div class="diagram-component w-1/3">External User</div>
+                        <div class="text-gray-600">🌐 Internet 🌐</div>
+                        <div class="firewall w-full">Firewall 1 (External)</div>
+                        
+                        <div class="network-zone w-full">
+                            <h4 class="text-center font-semibold text-orange-600">DMZ (Demilitarized Zone)</h4>
+                            <div class="diagram-component-dmz w-1/2 mx-auto">Web Server / Reverse Proxy + WebGate</div>
+                        </div>
+
+                        <div class="firewall w-full">Firewall 2 (Internal)</div>
+
+                        <div class="network-zone w-full">
+                             <h4 class="text-center font-semibold text-green-600">Internal Network</h4>
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-2">
+                                <div class="diagram-component-alt">Oracle Access Manager (OAM)</div>
+                                <div class="diagram-component-alt">Oracle Directory Services (OID/OUD)</div>
+                                <div class="diagram-component-alt col-span-1 md:col-span-2">EBS Application Tier (Forms, Concurrent Processing, etc.)</div>
+                                <div class="diagram-component-alt col-span-1 md:col-span-2">EBS Database Tier</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <h4 class="text-lg font-medium mt-6 mb-2 text-gray-800">Flow Description:</h4>
+                <div class="space-y-3">
+                    <p class="step-description" data-step="1">External user attempts to access an EBS URL.</p>
+                    <p class="step-description" data-step="2">Request passes through the external firewall to the Web Server/Reverse Proxy in the DMZ.</p>
+                    <p class="step-description" data-step="3">The WebGate on the DMZ server intercepts the request. If the user is not authenticated, WebGate initiates the OAM authentication flow.</p>
+                    <p class="step-description" data-step="4">WebGate communicates with OAM (located in the internal network) through the internal firewall. This communication is typically over specific, secured ports.</p>
+                    <p class="step-description" data-step="5">User authenticates with OAM (which might involve directory lookups, MFA, etc., all within the internal network or trusted zones).</p>
+                    <p class="step-description" data-step="6">Once OAM confirms authentication, it provides a session token to WebGate.</p>
+                    <p class="step-description" data-step="7">WebGate (in DMZ) then proxies the authenticated request (or allows access) to the EBS Application Tier in the internal network, again through the internal firewall.</p>
+                    <p class="step-description" data-step="8">EBS processes the request and returns the response, which flows back through the same path.</p>
+                </div>
+            </div>
+
             <div id="tab2" class="tab-content">
-                <h2 class="text-xl font-semibold mb-3 text-indigo-700">Scenario 2: Generic PKI-Based Authentication Flow</h2>
+                <h2 class="text-xl font-semibold mb-3 text-indigo-700">Scenario 4: Generic PKI-Based Authentication Flow</h2>
                 <p class="mb-4 text-gray-700">This outlines a typical Public Key Infrastructure (PKI) authentication process where a user's identity is verified using digital certificates and private keys, often involving a smart card or software certificate.</p>
                 <div class="diagram-box">
                     <h3 class="text-lg font-medium mb-2 text-center">Oracle Fusion Based SSO Sequence</h3>
                     <div class="ebs-image-container">
                         <img src="oracle-webgate-generic.png" class="ebs-img-no-text">
+                        <img src="oracle-webgate-generic.png" class="ebs-img-with-text">
                     </div>
                 </div>
 
@@ -198,70 +264,7 @@
 
                 </ul>
             </div>
-
-            <div id="tab3" class="tab-content">
-                <h2 class="text-xl font-semibold mb-3 text-indigo-700">Scenario 3: Oracle E-Business Suite Integration with OAM (AccessGate)</h2>
-                <p class="mb-4 text-gray-700">This scenario shows how Oracle Access Manager (OAM) secures Oracle E-Business Suite (EBS) using WebGate and EBS AccessGate. Hover over the diagram to see annotations.</p>
-                <div class="diagram-box">
-                     <h3 class="text-lg font-medium mb-2 text-center">EBS AccessGate Flow (Hover for details)</h3>
-                    <div class="ebs-image-container">
-                        <img src="con_ai_integration1.gif" alt="EBS AccessGate Flow - No Text" class="ebs-img-no-text">
-                        <img src="con_ai_integrationseq.gif" alt="EBS AccessGate Flow - With Text Annotations" class="ebs-img-with-text">
-                    </div>
-                </div>
-                <h4 class="text-lg font-medium mt-6 mb-2 text-gray-800">Step-by-Step (Interpreted from Annotated Diagram):</h4>
-                <div class="space-y-3">
-                    <p class="step-description" data-step="1">User requests a protected EBS resource.</p>
-                    <p class="step-description" data-step="2">User is redirected to the OAM-protected AccessGate.</p>
-                    <p class="step-description" data-step="3">Per OAM policies, WebGate intercepts the request, collects credentials (if needed), and relays them to the Access Manager server.</p>
-                    <p class="step-description" data-step="4">OAM verifies credentials against the user directory (e.g., Oracle Directory Services) and creates a user session.</p>
-                    <p class="step-description" data-step="5">OAM WebGate securely passes the user identifier to EBS AccessGate.</p>
-                    <p class="step-description" data-step="6">AccessGate identifies the EBS user that is linked to the authenticated Oracle Directory Services user.</p>
-                    <p class="step-description" data-step="7">User is redirected to the original URL with an authenticated EBS session, and the resource is returned to the browser.</p>
-                </div>
-            </div>
-
-            <div id="tab4" class="tab-content">
-                <h2 class="text-xl font-semibold mb-3 text-indigo-700">Scenario 4: EBS Access via DMZ with WebGate</h2>
-                <p class="mb-4 text-gray-700">Illustrates the network architecture for external users accessing Oracle E-Business Suite, involving a Demilitarized Zone (DMZ).</p>
-                <div class="diagram-box">
-                    <h3 class="text-lg font-medium mb-2 text-center">DMZ Architecture for EBS Access</h3>
-                    <div class="flex flex-col items-center space-y-2">
-                        <div class="diagram-component w-1/3">External User</div>
-                        <div class="text-gray-600">🌐 Internet 🌐</div>
-                        <div class="firewall w-full">Firewall 1 (External)</div>
-                        
-                        <div class="network-zone w-full">
-                            <h4 class="text-center font-semibold text-orange-600">DMZ (Demilitarized Zone)</h4>
-                            <div class="diagram-component-dmz w-1/2 mx-auto">Web Server / Reverse Proxy + WebGate</div>
-                        </div>
-
-                        <div class="firewall w-full">Firewall 2 (Internal)</div>
-
-                        <div class="network-zone w-full">
-                             <h4 class="text-center font-semibold text-green-600">Internal Network</h4>
-                            <div class="grid grid-cols-1 md:grid-cols-2 gap-2">
-                                <div class="diagram-component-alt">Oracle Access Manager (OAM)</div>
-                                <div class="diagram-component-alt">Oracle Directory Services (OID/OUD)</div>
-                                <div class="diagram-component-alt col-span-1 md:col-span-2">EBS Application Tier (Forms, Concurrent Processing, etc.)</div>
-                                <div class="diagram-component-alt col-span-1 md:col-span-2">EBS Database Tier</div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <h4 class="text-lg font-medium mt-6 mb-2 text-gray-800">Flow Description:</h4>
-                <div class="space-y-3">
-                    <p class="step-description" data-step="1">External user attempts to access an EBS URL.</p>
-                    <p class="step-description" data-step="2">Request passes through the external firewall to the Web Server/Reverse Proxy in the DMZ.</p>
-                    <p class="step-description" data-step="3">The WebGate on the DMZ server intercepts the request. If the user is not authenticated, WebGate initiates the OAM authentication flow.</p>
-                    <p class="step-description" data-step="4">WebGate communicates with OAM (located in the internal network) through the internal firewall. This communication is typically over specific, secured ports.</p>
-                    <p class="step-description" data-step="5">User authenticates with OAM (which might involve directory lookups, MFA, etc., all within the internal network or trusted zones).</p>
-                    <p class="step-description" data-step="6">Once OAM confirms authentication, it provides a session token to WebGate.</p>
-                    <p class="step-description" data-step="7">WebGate (in DMZ) then proxies the authenticated request (or allows access) to the EBS Application Tier in the internal network, again through the internal firewall.</p>
-                    <p class="step-description" data-step="8">EBS processes the request and returns the response, which flows back through the same path.</p>
-                </div>
-            </div>
-
+            
             <div id="tab5" class="tab-content">
                 <h2 class="text-xl font-semibold mb-3 text-indigo-700">Scenario 5: SSO for Oracle Products via OAM & WebGate</h2>
                 <p class="mb-4 text-gray-700">Demonstrates how Oracle Access Manager and WebGate provide Single Sign-On (SSO) across various Oracle applications.</p>
