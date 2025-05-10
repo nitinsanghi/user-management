@@ -100,10 +100,7 @@
                     <button class="tab-button inline-block p-4 border-b-2 border-transparent rounded-t-lg hover:text-gray-600 hover:border-gray-300" data-tab="tab6">Oracle Products</button>
                 </li>
                 <li>
-                    <button class="tab-button inline-block p-4 border-b-2 border-transparent rounded-t-lg hover:text-gray-600 hover:border-gray-300" data-tab="tab7">SSO</button>
-                </li>
-                <li>
-                    <button class="tab-button inline-block p-4 border-b-2 border-transparent rounded-t-lg hover:text-gray-600 hover:border-gray-300" data-tab="tab8">Auth Sequence Diagram</button>
+                    <button class="tab-button inline-block p-4 border-b-2 border-transparent rounded-t-lg hover:text-gray-600 hover:border-gray-300" data-tab="tab7">SSO - OAM and PKI</button>
                 </li>
             </ul>
         </nav>
@@ -379,81 +376,6 @@ sequenceDiagram
                     <li><strong>Federation Agreement/Trust:</strong> Pre-established configuration between OAM (SP) and the 3rd Party IdP, including exchanging metadata, certificates, and defining endpoints.</li>
                 </ul>
         </div>
-
-            <div id="tab8" class="tab-content">
-                <h2 class="text-xl font-semibold mb-3 text-indigo-700">Detailed Authentication Sequence</h2>
-                <p class="mb-4 text-gray-700">Explains how Oracle Access Manager (OAM) can act as a Service Provider (SP), integrating with a 3rd party Identity Provider (IdP) for authentication using the SAML protocol. This allows users to authenticate at the 3rd party IdP and then access OAM-protected applications.</p>
-                 <div class="diagram-box">
-                    <h3 class="text-lg font-medium mb-2 text-center">OAM as SAML SP Flow (Federating to 3rd Party IdP)</h3>
-                    <div class="mermaid">
-sequenceDiagram
-    title SAML Authentication Flow (App -> OAM (SP) -> 3rd Party IDP)
-
-    participant User
-    participant App_WebGate as Application / WebGate
-    participant OAM_Server as OAM Server (SP)
-    participant Third_Party_IDP as 3rd Party IDP
-
-    User->>+App_WebGate: 1. Access Application URL (/myapp)
-    activate App_WebGate
-    Note over App_WebGate: Intercepts request, checks OAM session
-    App_WebGate-->>User: 2. Redirect to OAM (No OAM Session)
-    deactivate App_WebGate
-
-    User->>+OAM_Server: 3. Request OAM Authentication URL
-    activate OAM_Server
-    Note right of OAM_Server: OAM determines SAML Federation is required (SP role)
-    OAM_Server->>OAM_Server: 4. Generate SAML AuthnRequest for 3rd Party IdP
-    OAM_Server-->>User: 5. Redirect to 3rd Party IDP SSO URL (with AuthnRequest)
-    deactivate OAM_Server
-
-    User->>+Third_Party_IDP: 6. Request IDP SSO URL (forwarding AuthnRequest)
-    activate Third_Party_IDP
-    Note right of Third_Party_IDP: IDP Checks for existing IDP session
-    alt No Active IDP Session
-        Third_Party_IDP-->>User: 7a. Present IDP Login Page
-        User->>Third_Party_IDP: 7b. Submit Credentials (user/pass/MFA at IdP)
-        Third_Party_IDP->>Third_Party_IDP: 7c. Authenticate User
-    else Active IDP Session Found
-        Note right of Third_Party_IDP: Skip login (IDP SSO)
-    end
-    Note right of Third_Party_IDP: IDP sets its own session cookie
-    Third_Party_IDP->>Third_Party_IDP: 8. Generate Signed SAML Assertion
-    Third_Party_IDP-->>User: 9. Redirect to OAM ACS URL (with SAML Assertion via POST)
-    deactivate Third_Party_IDP
-
-    User->>+OAM_Server: 10. POST SAML Assertion to OAM Assertion Consumer Service (ACS)
-    activate OAM_Server
-    OAM_Server->>OAM_Server: 11. Validate SAML Assertion (Signature, Issuer, etc.)
-    Note right of OAM_Server: If Assertion is valid: Create OAM Session, map user
-    OAM_Server-->>User: 12. Set OAM Session Cookie & Redirect to original App URL
-    deactivate OAM_Server
-
-    User->>+App_WebGate: 13. Request Application URL again (now with OAM Cookie)
-    activate App_WebGate
-    Note over App_WebGate: Intercepts request, finds OAM Cookie
-    App_WebGate->>+OAM_Server: 14. Validate OAM Cookie (OAM session check)
-    activate OAM_Server
-    OAM_Server-->>-App_WebGate: 15. Cookie is Valid (Session OK)
-    deactivate OAM_Server
-    Note over App_WebGate: Access Granted
-    App_WebGate->>User: 16. Return Application Content/Page
-    deactivate App_WebGate
-    opt Application sets own session
-        App_WebGate-->>User: Set Application Session Cookie (e.g., JSESSIONID)
-    end
-                    </div>
-                </div>
-                <h4 class="text-lg font-medium mt-6 mb-2 text-gray-800">Key SAML Concepts (OAM as SP):</h4>
-                <ul class="list-disc list-inside text-gray-700 space-y-1">
-                    <li><strong>Service Provider (SP):</strong> The entity that relies on an external IdP for authentication before granting access to a resource (OAM and the application it protects are collectively the SP in this context).</li>
-                    <li><strong>Identity Provider (IdP):</strong> The external entity that authenticates the user and provides an assertion about their identity (3rd Party IdP).</li>
-                    <li><strong>SAML Assertion:</strong> An XML document from the IdP containing statements about the user's authentication.</li>
-                    <li><strong>SAML AuthnRequest:</strong> Sent by OAM (as SP) to the 3rd Party IdP to request user authentication.</li>
-                    <li><strong>Assertion Consumer Service (ACS):</strong> An endpoint on OAM (SP) that receives and processes the SAML Assertion from the IdP.</li>
-                    <li><strong>Federation Agreement/Trust:</strong> Pre-established configuration between OAM (SP) and the 3rd Party IdP, including exchanging metadata, certificates, and defining endpoints.</li>
-                </ul>
-            </div>
         </div>
     </div>
 
