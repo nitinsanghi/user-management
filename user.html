@@ -486,10 +486,10 @@
                         rect rgba(242, 220, 219, 0.6)
                         Note right of User: MoF Beneficiary Code System (via PKI)
                         User->>BCS: 1. Access MoF Beneficiary Code System
-                        MoF->>PKI: 2. Check Authentication
+                        BCS->>PKI: 2. Check Authentication
                         Note over PKI: PKI Level SSO
                         PKI->>BCS: 3. User Already Authenticated
-                        MoF->>User: 4. Access Granted
+                        BCS->>User: 4. Access Granted
                         end
                     </div>
                 </div>
