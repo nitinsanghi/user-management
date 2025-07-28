@@ -460,7 +460,7 @@
                         participant OAM as OAM
                         participant PKI as PKI Provider
                         participant Hyperion as Hyperion
-                        participant MoF as MoF Supplier Portal
+                        participant BCS as MoF Beneficiary Code System
 
                         rect rgba(221, 235, 247, 0.6)
                         Note right of User: Initial Authentication Flow
@@ -484,8 +484,8 @@
                         end
 
                         rect rgba(242, 220, 219, 0.6)
-                        Note right of User: MoF Portal SSO (via PKI)
-                        User->>MoF: 1. Access MoF Supplier Portal
+                        Note right of User: MoF Beneficiary Code System (via PKI)
+                        User->>BCS: 1. Access MoF Beneficiary Code System
                         MoF->>PKI: 2. Check Authentication
                         Note over PKI: PKI Level SSO
                         PKI->>MoF: 3. User Already Authenticated
